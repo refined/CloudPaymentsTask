@@ -1,0 +1,25 @@
+﻿@model IEnumerable<CloudPayments.Models.Product>
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<h2>title</h2>
+<a asp-action="Create" class="navbar-brand">Добавить</a>
+
+<ul class="list-unstyled">
+    @foreach (var product in ViewData.Model)
+    {
+    <li class="media">
+        <img data-src="holder.js/64x64" class="img-thumbnail" alt="64x64" style="width: 64px; height: 64px;">
+        <div class="media-body">
+            <h5 class="mt-0 mb-1">@product.Title</h5>
+            <p></p>@product.Price @product.Currency
+            <p>
+                <a asp-route-id="@product.Id" asp-action="Edit" class="navbar-brand">Редактировать</a>
+            </p>
+    </div>
+    </li>
+    }
+</ul>

@@ -36,6 +36,8 @@ namespace CloudPayments
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddScoped<IProductsRepository, ProductsRepository>();
+
 
             var connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CloudPaymentsDB;Integrated Security=True";
             services.AddDbContext<CloudPaymentsDbContext>(

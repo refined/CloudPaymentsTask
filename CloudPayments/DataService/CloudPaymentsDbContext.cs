@@ -5,7 +5,7 @@ namespace CloudPayments.DataService
 {
     public class CloudPaymentsDbContext : DbContext
     {
-        public CloudPaymentsDbContext()
+        public CloudPaymentsDbContext(DbContextOptions options) : base(options)
         {
         }
 

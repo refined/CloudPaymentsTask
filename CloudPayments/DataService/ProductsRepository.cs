@@ -35,15 +35,15 @@ namespace CloudPayments.DataService
                 .ToListAsync();
         }
 
-        public Task AddAsync(Product session)
+        public Task AddAsync(Product item)
         {
-            _dbContext.Products.Add(session);
+            _dbContext.Products.Add(item);
             return _dbContext.SaveChangesAsync();
         }
 
-        public Task UpdateAsync(Product session)
+        public Task UpdateAsync(Product item)
         {
-            _dbContext.Entry(session).State = EntityState.Modified;
+            _dbContext.Entry(item).State = EntityState.Modified;
             return _dbContext.SaveChangesAsync();
         }
     }
