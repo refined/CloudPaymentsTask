@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using CloudPayments.DataService;
 using Microsoft.AspNetCore.Mvc;
 using CloudPayments.Models;
 
@@ -10,28 +11,17 @@ namespace CloudPayments.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IProductsRepository _productsRepository;
+
+        public HomeController(IProductsRepository productsRepository)
         {
-            return View();
+            _productsRepository = productsRepository;
         }
 
-        public IActionResult About()
+        public async Task<IActionResult> Index()
         {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
+            var products = await _productsRepository.ListAsync();
+            return View(products);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

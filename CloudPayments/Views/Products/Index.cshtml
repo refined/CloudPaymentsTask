@@ -1,25 +1,53 @@
 ﻿@model IEnumerable<CloudPayments.Models.Product>
 
-@{
-    ViewBag.Title = "title";
-    Layout = "_Layout";
-}
 
 <h2>title</h2>
 <a asp-action="Create" class="navbar-brand">Добавить</a>
 
-<ul class="list-unstyled">
+<table class="table">
+    <tbody>
     @foreach (var product in ViewData.Model)
     {
-    <li class="media">
-        <img data-src="holder.js/64x64" class="img-thumbnail" alt="64x64" style="width: 64px; height: 64px;">
-        <div class="media-body">
-            <h5 class="mt-0 mb-1">@product.Title</h5>
-            <p></p>@product.Price @product.Currency
-            <p>
-                <a asp-route-id="@product.Id" asp-action="Edit" class="navbar-brand">Редактировать</a>
-            </p>
-    </div>
-    </li>
+        <tr>
+            <td>@product.Id</td>
+            <td>
+                <img data-src="holder.js/64x64" class="img-thumbnail" alt="64x64" style="width: 64px; height: 64px;">
+            </td>
+            <td>@product.Title</td>
+            <td>@product.Price</td>
+            <td>@product.Currency</td>
+            <td><a asp-route-id="@product.Id" asp-action="Edit">Редактировать</a></td>
+        </tr>
     }
-</ul>
+    </tbody>
+</table>
+
+
+@section Scripts
+{
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
+    <script>
+        this.pay = function (totalPrice, currency) {
+            var payments = new cp.CloudPayments();
+            var invoice = Math.random() * Math.floor(100000);
+            payments.charge({ // options
+                publicId: 'test_api_00000000000000000000001',
+                description: 'Оплата товаров в example.com',
+                amount: totalPrice,
+                currency: currency,
+                invoiceId: invoice,
+                accountId: 'user@example.com',
+                data: {
+                    myProp: 'myProp value' + invoice
+                }
+            },
+            function (options) { // success
+                alert("Ok");
+            },
+            function (reason, options) { // fail
+                console.log(reason);
+            });
+        };
+        pay(1000, "RUB");
+    </script>
+}
