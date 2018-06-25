@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CloudPayments.DataService;
-using CloudPayments.Models;
+﻿using CloudPayments.DataServices;
+using CloudPayments.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,6 +32,7 @@ namespace CloudPayments
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<IProductsRepository, ProductsRepository>();
+            services.AddScoped<ICurrencyManager, CurrencyManager>();
 
 
             var connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CloudPaymentsDB;Integrated Security=True";

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using CloudPayments.DataService;
+using CloudPayments.DataServices;
 using Microsoft.AspNetCore.Mvc;
 using CloudPayments.Models;
 

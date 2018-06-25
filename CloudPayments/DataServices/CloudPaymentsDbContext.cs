@@ -1,7 +1,7 @@
 ﻿using CloudPayments.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CloudPayments.DataService
+namespace CloudPayments.DataServices
 {
     public class CloudPaymentsDbContext : DbContext
     {

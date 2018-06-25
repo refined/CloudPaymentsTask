@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using CloudPayments.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CloudPayments.DataService
+namespace CloudPayments.DataServices
 {
     public interface IProductsRepository
     {
