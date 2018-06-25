@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using CloudPayments.Models;
 using Microsoft.EntityFrameworkCore;
+using EntityState = Microsoft.EntityFrameworkCore.EntityState;
 
 namespace CloudPayments.DataServices
 {
@@ -10,8 +12,9 @@ namespace CloudPayments.DataServices
     {
         Task<Product> GetByIdAsync(int id);
         Task<List<Product>> ListAsync();
-        Task AddAsync(Product session);
-        Task UpdateAsync(Product session);
+        Task AddAsync(Product item);
+        Task UpdateAsync(Product item);
+        Task RemoveAsync(int id);
     }
 
     public class ProductsRepository : IProductsRepository
@@ -45,6 +48,17 @@ namespace CloudPayments.DataServices
         {
             _dbContext.Entry(item).State = EntityState.Modified;
             return _dbContext.SaveChangesAsync();
+        }
+
+        public async Task RemoveAsync(int id)
+        {
+            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null)
+            {
+                throw new ObjectNotFoundException();
+            }
+            _dbContext.Products.Remove(product);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

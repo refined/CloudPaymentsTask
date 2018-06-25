@@ -5,7 +5,8 @@
     @foreach (var product in ViewData.Model)
     {
         <li class="media">
-            <img data-src="holder.js/64x64" class="img-thumbnail" alt="64x64" style="width: 64px; height: 64px;">
+            <img src="/images/@product.ImageName" class="img-thumbnail img-responsive" alt="@product.ImageName" 
+                 style="height: auto; width: auto; max-width: 80px; max-height: 80px;">
             <div class="media-body">
                 <h5 class="">@product.Title</h5>
                 <p>@product.Price @product.Currency</p>
@@ -13,3 +14,33 @@
         </li>
     }
 </ul>
+
+
+@section Scripts
+{
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
+    <script>
+        this.pay = function (totalPrice, currency) {
+            var payments = new cp.CloudPayments();
+            var invoice = Math.random() * Math.floor(100000);
+            payments.charge({ // options
+                    publicId: 'test_api_00000000000000000000001',
+                    description: 'Оплата товаров в example.com',
+                    amount: totalPrice,
+                    currency: currency,
+                    invoiceId: invoice,
+                    accountId: 'user@example.com',
+                    data: {
+                        myProp: 'myProp value' + invoice
+                    }
+                },
+                function (options) { // success
+                    alert("Ok");
+                },
+                function (reason, options) { // fail
+                    console.log(reason);
+                });
+        };
+        //pay(1000, "RUB");
+    </script>
+}

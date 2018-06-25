@@ -1,19 +1,24 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
-using CloudPayments.DataService;
 using CloudPayments.DataServices;
 using CloudPayments.Models;
+using CloudPayments.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CloudPayments.Controllers
 {
     public class ProductsController : Controller
     {
         private readonly IProductsRepository _productsRepository;
+        private readonly IImageService _imageService;
 
-        public ProductsController(IProductsRepository productsRepository)
+        public ProductsController(IProductsRepository productsRepository, IImageService imageService)
         {
             _productsRepository = productsRepository;
+            _imageService = imageService;
         }
 
         public async Task<IActionResult> Index()
@@ -41,13 +46,15 @@ namespace CloudPayments.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Price,Currency")] Product model)
+        public async Task<IActionResult> Create([Bind("Title,Price,Currency")] Product model, IFormFile file)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new BadRequestResult();
             }
-
+            var filePath = await _imageService.SaveImage(file, "products");
+            
+            model.ImageName = filePath;
             await _productsRepository.AddAsync(model);
 
             //return Ok();
@@ -56,7 +63,7 @@ namespace CloudPayments.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Product model)
+        public async Task<IActionResult> Edit(Product model, IFormFile file)
         {
             if (!ModelState.IsValid)
             {
@@ -68,13 +75,38 @@ namespace CloudPayments.Controllers
             {
                 return NotFound(model.Id);
             }
+            
             try
             {
+                var newImagePath = await _imageService.SaveImage(file, "products");
+                dbModel.ImageName = newImagePath;
                 dbModel.Price = model.Price;
                 dbModel.Title = model.Title;
                 dbModel.Currency = model.Currency;
-                dbModel.ImageName = model.ImageName;
+                
                 await _productsRepository.UpdateAsync(dbModel);
+                if (!string.IsNullOrEmpty(dbModel.ImageName))
+                {
+                    await _imageService.DeleteImage(dbModel.ImageName);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _productsRepository.RemoveAsync(id);
             }
             catch (Exception e)
             {
