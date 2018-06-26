@@ -37,7 +37,6 @@ namespace CloudPayments.DataServices
         public Task<List<Product>> ListAsync()
         {
             return _dbContext.Products
-                .OrderByDescending<Product, double>(s => s.Price)
                 .ToListAsync();
         }
 

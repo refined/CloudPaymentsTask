@@ -1,12 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using CloudPayments.DataServices;
 using CloudPayments.Models;
 using CloudPayments.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CloudPayments.Controllers
 {
@@ -48,9 +46,9 @@ namespace CloudPayments.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,Price,Currency")] Product model, IFormFile file)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || file == null)
             {
-                return new BadRequestResult();
+                return BadRequest(ModelState);
             }
             var filePath = await _imageService.SaveImage(file, "products");
             
@@ -78,16 +76,22 @@ namespace CloudPayments.Controllers
             
             try
             {
-                var newImagePath = await _imageService.SaveImage(file, "products");
-                dbModel.ImageName = newImagePath;
+                var oldImageName = dbModel.ImageName;
+                if (file != null)
+                {
+                    var newImagePath = await _imageService.SaveImage(file, "products");
+                    dbModel.ImageName = newImagePath;
+                }
+                
                 dbModel.Price = model.Price;
                 dbModel.Title = model.Title;
                 dbModel.Currency = model.Currency;
                 
                 await _productsRepository.UpdateAsync(dbModel);
-                if (!string.IsNullOrEmpty(dbModel.ImageName))
+
+                if (file != null && !string.IsNullOrEmpty(oldImageName))
                 {
-                    await _imageService.DeleteImage(dbModel.ImageName);
+                    await _imageService.DeleteImage(oldImageName);
                 }
             }
             catch (Exception e)

@@ -13,10 +13,16 @@ namespace CloudPayments.Services
 
     public class ImageService : IImageService
     {
+        private const string IMAGE_FOLDER = "wwwroot/images/";
+
         public async Task<string> SaveImage(IFormFile formFile, string imageFolder)
         {
             var filePath = imageFolder + "/" + formFile.FileName;
-            using (var fileStream = new FileStream("images/" + filePath, FileMode.OpenOrCreate))
+            if (!new DirectoryInfo(IMAGE_FOLDER + imageFolder).Exists)
+            {
+                Directory.CreateDirectory(IMAGE_FOLDER + imageFolder);
+            }
+            using (var fileStream = new FileStream(IMAGE_FOLDER + filePath, FileMode.OpenOrCreate))
             {
                 await formFile.CopyToAsync(fileStream);
             }
@@ -27,7 +33,7 @@ namespace CloudPayments.Services
         {
             return Task.Run(() =>
             {
-                var file = new FileInfo("images/" + imagePath);
+                var file = new FileInfo(IMAGE_FOLDER + imagePath);
                 if (file.Exists)
                 {
                     file.Delete();
