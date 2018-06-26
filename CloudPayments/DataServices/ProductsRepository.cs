@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using CloudPayments.Models;
+using CloudPayments.Services;
 using Microsoft.EntityFrameworkCore;
 using EntityState = Microsoft.EntityFrameworkCore.EntityState;
 
@@ -20,10 +21,12 @@ namespace CloudPayments.DataServices
     public class ProductsRepository : IProductsRepository
     {
         private readonly CloudPaymentsDbContext _dbContext;
+        private readonly IImageService _imageService;
 
-        public ProductsRepository(CloudPaymentsDbContext dbContext)
+        public ProductsRepository(CloudPaymentsDbContext dbContext, IImageService imageService)
         {
             _dbContext = dbContext;
+            _imageService = imageService;
         }
 
         public Task<Product> GetByIdAsync(int id)
@@ -58,6 +61,7 @@ namespace CloudPayments.DataServices
                 throw new ObjectNotFoundException();
             }
             _dbContext.Products.Remove(product);
+            await _imageService.DeleteImage(product.ImageName);
             await _dbContext.SaveChangesAsync();
         }
     }

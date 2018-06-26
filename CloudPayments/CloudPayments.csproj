@@ -28,10 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\images\products\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="System.Data.Entity" />
   </ItemGroup>
 

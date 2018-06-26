@@ -42,6 +42,13 @@ namespace CloudPayments.DataServices
                         Price = 8000,
                         Currency = "руб",
                         ImageName = "products/fridge.jpg"
+                    },
+                    new Product
+                    {
+                        Title = "Стиралка за доллары",
+                        Price = 800,
+                        Currency = "usd",
+                        ImageName = "products/washer2.jpg"
                     }
                 );
                 context.SaveChanges();

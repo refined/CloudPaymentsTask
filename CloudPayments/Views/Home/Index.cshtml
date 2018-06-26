@@ -1,66 +1,116 @@
 ﻿@model IEnumerable<CloudPayments.Models.ProductViewModel>
 
-
-<ul class="list-unstyled">
-    @foreach (var product in ViewData.Model)
-    {
-        <li class="media">
-            <img src="@product.ImagePath" class="img-thumbnail img-responsive" alt="@product.Title"
-                 style="height: auto; width: auto; max-width: 80px; max-height: 80px;">
-            <div class="media-body">
-                <h5 class="">@product.Title</h5>
-                <p>@product.Price @product.Currency</p>
-                <button type="button" class="btn btn-primary btn-lg active" onclick="selectProduct(@product.Id, @product.Price, '@product.Currency')">Выбрать</button>
+<h2 id="content" style="margin: 30px 0">Товары нашего магазина</h2>
+<div class="container" >
+    <div class="row">
+        @foreach (var product in ViewData.Model)
+        {
+            <div class="col-md-3">
+                <img src="@product.ImagePath" class="img-thumbnail img-responsive" alt="@product.Title"
+                     style="height: auto; width: auto; max-width: 80px; max-height: 80px;">
+                <div class="media-body">
+                    <h5 class="">@product.Title</h5>
+                    <p>@product.Price @product.ViewCurrency</p>
+                    <button type="button" class="btn btn-primary btn-lg product"
+                            onclick="ProductsContainer.selectProduct(@product.Id, this)">
+                        Выбрать
+                    </button>
+                </div>
             </div>
-        </li>
-    }
-</ul>
-<h1 id="total-price"></h1>
-<button type="button" class="btn btn-primary btn-lg active" onclick="pay(totalPrice, 'RUB')">Выбрать</button>
+        }
+    </div>
+</div>
+
+<h3>Корзина:</h3>
+<h3 id="total-price"></h3>
+<button type="button" id="total-price-button" class="btn btn-success btn-lg" disabled
+        onclick="pay(ProductsContainer.totalPrice, ProductsContainer.currency)">
+    Оплатить
+</button>
 
 
 @section Scripts
-    {
+{
     <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
     <script>
-        this.pay = function (totalPrice, currency) {
+        this.pay = function(totalPrice, currency) {
             var payments = new cp.CloudPayments();
             var invoice = Math.random() * Math.floor(100000);
             payments.charge({ // options
-                publicId: 'test_api_00000000000000000000001',
-                description: 'Оплата товаров в example.com',
-                amount: totalPrice,
-                currency: currency,
-                invoiceId: invoice,
-                accountId: 'user@example.com',
-                data: {
-                    myProp: 'myProp value' + invoice
-                }
-            },
-                function (options) { // success
-                    alert("Ok");
+                    publicId: 'test_api_00000000000000000000001',
+                    description: 'Оплата товаров в example.com',
+                    amount: totalPrice,
+                    currency: currency,
+                    invoiceId: invoice,
+                    accountId: 'user@example.com',
+                    data: {
+                        myProp: 'myProp value' + invoice
+                    }
                 },
-                function (reason, options) { // fail
-                    console.log(reason);
+                function(options) { // success
+                    ProductsContainer.clearSelection();
+                },
+                function(reason, options) { // fail
+                    alert("Оплата не завершена. " + reason);
                 });
         };
         //
     </script>
     <script>
-        var selectedProducts = {};
-        var totalPrice = 0;
-        function selectProduct(id, price, currency) {
-            if (id in selectedProducts) delete selectedProducts[id];
-            else {
-                selectedProducts[id] = { price: price, currency: currency };
-            }
-            totalPrice = 0;
-            for (var i in selectedProducts) {
-                if (selectedProducts.hasOwnProperty(i)) {
-                    totalPrice += selectedProducts[i].price;
+        function ProductsSelector(products) {
+            var selectedProducts = {};
+
+            this.totalPrice = 0;
+            this.currency = "";
+            this.allProducts = products;
+            this.selectProduct = function(id, element) {
+                if (element.classList.contains('active') && id in selectedProducts) {
+                    delete selectedProducts[id];
+                    $(element).removeClass("active");
+                    $(element).blur();
+                } else {
+                    var product = this.allProducts.filter(e => e.id === id)[0];
+
+                    if (this.currency && product.currency !== this.currency) {
+                        alert("Валюта корзины не совпадает с товаром. " + this.currency);
+                        $(element).blur();
+                        return;
+                    }
+
+                    selectedProducts[id] = product;
+                    this.currency = product.currency;
+                    $(element).addClass("active");
+                    $(element).blur();
                 }
+
+                this.totalPrice = 0;
+                for (var i in selectedProducts) {
+                    if (selectedProducts.hasOwnProperty(i)) {
+                        this.totalPrice += selectedProducts[i].price;
+                    }
+                }
+                if (jQuery.isEmptyObject(selectedProducts)) {
+                    this.currency = "";
+                    $('#total-price-button').prop('disabled', true);
+                } else {
+                    $('#total-price-button').prop('disabled', false);
+                }
+
+                this.totalPrice = parseFloat(this.totalPrice.toFixed(2));
+                $("#total-price").html(this.totalPrice + " " + this.currency);
+                
             }
-            $("#total-price").html(totalPrice + " currency");
+
+            this.clearSelection = function() {
+                selectedProducts = {};
+                this.totalPrice = 0;
+                this.currency = "";
+                $(".product").removeClass("active");
+                $("#total-price").html(this.totalPrice + " " + this.currency);
+                $('#total-price-button').prop('disabled', true);
+            }
         }
+
+        var ProductsContainer = new ProductsSelector(@Json.Serialize(ViewData.Model));
     </script>
 }
